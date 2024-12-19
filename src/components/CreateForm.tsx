@@ -9,28 +9,32 @@ import { Button } from "./ui/button";
 import { ImSpinner2 } from "react-icons/im"
 import { toast } from "@/hooks/use-toast";
 import { createForm } from "@/actions/formActions";
+import { formSchema, formSchemaType } from "@/schemas/form";
 
 
 
 export default function CreateForm() {
-    const formSchema = z.object({
-        name: z.string(),
-        description: z.string().min(10),
-        age: z.string()
-    })
-
-    type formSchemaType = z.infer<typeof formSchema>
+   
 
     const form = useForm<formSchemaType>({
-        resolver: zodResolver(formSchema)
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            name: "",
+            description: "",
+            age: 15
+        }
     })
 
     async function onSubmit(values: formSchemaType) {
         try {
-            await createForm(values)
-            toast({
-                title: "Sikeres mentés",
-            })
+            const personId = await createForm(values)
+            if (personId) {
+                form.reset()
+
+                toast({
+                    title: "Sikeres Mentés"
+                })
+            }
         }catch (error) {
             toast({
                 title: "Hiba",
@@ -75,7 +79,7 @@ export default function CreateForm() {
                         <FormItem>
                             <FormLabel>Életkor</FormLabel>
                             <FormControl>
-                                <Input {...field} />
+                                <Input type="number" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
